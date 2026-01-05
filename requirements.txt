@@ -1,0 +1,22 @@
+# Audio Fusion - Dependencias
+# ============================
+
+# API backend
+fastapi>=0.110.0
+uvicorn[standard]>=0.27.0
+
+# Procesamiento de audio
+pydub>=0.25.1
+
+# Python 3.13: reemplazo de `audioop` (pydub lo usa como `pyaudioop`)
+audioop-lts>=0.2.1
+
+# FFMPEG portable (fallback si no está instalado en el sistema)
+imageio-ffmpeg>=0.5.1
+
+# Uploads (FastAPI)
+python-multipart>=0.0.9
+
+# Testing
+pytest>=8.0.0
+pytest-cov>=4.1.0

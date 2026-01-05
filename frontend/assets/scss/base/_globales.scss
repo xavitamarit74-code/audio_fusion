@@ -1,0 +1,7 @@
+
+@use 'variables' as v;
+
+body {
+  background: v.$fondo;
+  color: v.$texto;
+}

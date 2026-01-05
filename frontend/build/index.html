@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Audio Fusion</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/css/main.css" />
+  </head>
+  <body>
+    <main class="app" id="main-content">
+      <header class="app__header">
+        <div class="app__header-top">
+          <picture class="app__brand" aria-hidden="true">
+            <source srcset="/img/brain-neon-sin-fondo.avif" type="image/avif" />
+            <source srcset="/img/brain-neon-sin-fondo.webp" type="image/webp" />
+            <img class="app__logo" src="/img/brain-neon-sin-fondo.webp" alt="" width="64" height="64" />
+          </picture>
+          <h1 class="app__title">Audio Fusion</h1>
+        </div>
+        <p class="app__subtitle">Fusiona múltiples audios con crossfade profesional</p>
+      </header>
+
+      <section class="panel" aria-label="Subida de archivos">
+        <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Arrastra o selecciona archivos">
+          <input
+            class="dropzone__input"
+            id="fileInput"
+            type="file"
+            multiple
+            accept="audio/*,video/mp4,video/quicktime,.m4r,.flac,.ogg"
+          />
+          <div class="dropzone__content">
+            <div class="dropzone__title">Arrastra tus archivos aquí</div>
+            <div class="dropzone__hint">o haz clic para seleccionar (2–10 archivos)</div>
+            <div class="dropzone__formats">MP3, M4A, M4R, MP4, WAV, OGG, FLAC, MOV</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" aria-label="Lista de archivos">
+        <div class="panel__header">
+          <h2 class="panel__title">Archivos</h2>
+          <div class="panel__meta" id="filesMeta">0 archivos</div>
+        </div>
+        <ul class="file-list" id="fileList"></ul>
+      </section>
+
+      <section class="panel" aria-label="Parámetros">
+        <div class="panel__header">
+          <h2 class="panel__title">Parámetros</h2>
+        </div>
+
+        <div class="controls">
+          <div class="control">
+            <label class="control__label" for="crossfade">Crossfade (<span id="crossfadeValue">2.0</span>s)</label>
+            <input class="control__range" id="crossfade" type="range" min="0" max="10000" step="100" value="2000" />
+          </div>
+
+          <div class="controls__grid">
+            <div class="control">
+              <label class="control__label" for="fadeIn">Fade In (<span id="fadeInValue">0.0</span>s)</label>
+              <input class="control__range" id="fadeIn" type="range" min="0" max="5000" step="100" value="0" />
+            </div>
+            <div class="control">
+              <label class="control__label" for="fadeOut">Fade Out (<span id="fadeOutValue">0.0</span>s)</label>
+              <input class="control__range" id="fadeOut" type="range" min="0" max="5000" step="100" value="0" />
+            </div>
+          </div>
+
+          <div class="controls__grid">
+            <div class="toggle">
+              <label class="toggle__label" for="normalize">Normalizar</label>
+              <input class="toggle__input" id="normalize" type="checkbox" />
+            </div>
+            <div class="select">
+              <label class="select__label" for="format">Formato</label>
+              <select class="select__input" id="format">
+                <option value="mp3" selected>mp3</option>
+                <option value="m4a">m4a</option>
+                <option value="m4r">m4r</option>
+                <option value="mp4">mp4</option>
+                <option value="flac">flac</option>
+                <option value="ogg">ogg</option>
+                <option value="wav">wav</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" aria-label="Acciones">
+        <div class="actions">
+          <button class="button button--secondary" id="previewBtn" disabled>Previsualizar</button>
+          <button class="button button--primary" id="mergeBtn" disabled>Fusionar</button>
+        </div>
+
+        <div class="progress" id="previewProgress" hidden>
+          <div class="progress__label" id="previewStage">Preview</div>
+          <progress class="progress__bar" id="previewBar" max="100" value="0"></progress>
+        </div>
+
+        <div class="progress" id="mergeProgress" hidden>
+          <div class="progress__label" id="mergeStage">Fusión</div>
+          <progress class="progress__bar" id="mergeBar" max="100" value="0"></progress>
+        </div>
+
+        <div class="message" id="message" role="alert" hidden></div>
+
+        <div class="actions actions--reset">
+          <button class="button button--secondary" id="clearBtn" type="button">Limpiar archivos/resultados</button>
+          <button class="button button--danger" id="hardResetBtn" type="button">RESET</button>
+        </div>
+      </section>
+
+      <section class="panel" aria-label="Preview" id="previewPanel" hidden>
+        <div class="panel__header">
+          <h2 class="panel__title">Previsualización</h2>
+        </div>
+        <audio class="audio" id="previewAudio" controls></audio>
+      </section>
+
+      <section class="panel" aria-label="Resultado" id="resultPanel" hidden>
+        <div class="panel__header">
+          <h2 class="panel__title">Resultado</h2>
+          <a class="link" id="downloadLink" href="#" download>Descargar</a>
+        </div>
+        <audio class="audio" id="resultAudio" controls></audio>
+        <div class="hint" id="resultHint" hidden>Este formato puede no reproducirse en tu navegador. Usa “Descargar”.</div>
+      </section>
+
+      <footer class="app__footer" aria-label="Copyright">
+        <small class="app__copyright">© 2026 JavierTamaritWeb.es. Todos los derechos reservados.</small>
+      </footer>
+    </main>
+
+    <script type="module" src="/js/app.js"></script>
+  </body>
+</html>

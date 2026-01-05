@@ -1,0 +1,236 @@
+@use '../base/variables' as v;
+
+.panel {
+  background: v.$panel;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 14px 0;
+}
+
+.panel__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.panel__title { margin: 0; font-size: 18px; }
+.panel__meta { color: v.$muted; font-size: 14px; }
+
+.dropzone {
+  border: 2px dashed v.$border;
+  border-radius: 12px;
+  padding: 22px;
+  cursor: pointer;
+  outline: none;
+}
+
+.dropzone:focus {
+  border-color: v.$accent;
+  box-shadow: 0 0 0 2px rgba(214, 51, 132, 0.35);
+}
+
+.dropzone--over {
+  border-color: v.$accent;
+  background: rgba(214, 51, 132, 0.08);
+}
+
+.dropzone__input { display: none; }
+.dropzone__title { font-weight: 700; font-size: 18px; }
+.dropzone__hint { color: v.$muted; margin-top: 6px; }
+.dropzone__formats { color: v.$muted; margin-top: 10px; font-size: 12px; }
+
+.file-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.file {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid v.$border;
+  background: #101010;
+}
+
+.file__left {
+  display: flex;
+  gap: 12px;
+  min-width: 0;
+}
+
+.file__order {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  color: v.$accent;
+  font-weight: 800;
+  background: rgba(214, 51, 132, 0.12);
+}
+
+.file__info { min-width: 0; }
+.file__name {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 360px;
+}
+
+.file__meta { color: v.$muted; font-size: 12px; margin-top: 4px; }
+
+.file__controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.file__volume { width: 180px; }
+
+.icon-btn {
+  border: 1px solid v.$border;
+  background: transparent;
+  color: v.$texto;
+  border-radius: 8px;
+  padding: 6px 8px;
+  cursor: pointer;
+}
+
+.icon-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.icon-btn--danger { border-color: rgba(239, 68, 68, 0.6); color: #fecaca; }
+
+.controls {
+  display: grid;
+  gap: 12px;
+}
+
+.controls__grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 700px) {
+  .controls__grid { grid-template-columns: 1fr 1fr; }
+}
+
+.control__label { display: block; margin-bottom: 6px; color: v.$muted; }
+.control__range { width: 100%; }
+
+.toggle, .select {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid v.$border;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.toggle__label, .select__label { color: v.$muted; }
+
+.select__input {
+  background: transparent;
+  border: 1px solid v.$border;
+  color: v.$texto;
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+@media (min-width: 700px) {
+  .actions { grid-template-columns: 1fr 1fr; }
+}
+
+.actions--reset {
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid v.$border;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.button {
+  border: 1px solid v.$border;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.button--primary {
+  background: v.$accent;
+  color: v.$texto;
+  border-color: rgba(214, 51, 132, 0.7);
+}
+
+.button--secondary {
+  background: transparent;
+  color: v.$accent-2;
+  border-color: rgba(78, 205, 196, 0.7);
+}
+
+.button--danger {
+  background: v.$danger;
+  color: v.$texto;
+  border-color: v.$danger;
+}
+
+.progress {
+  margin-top: 12px;
+  display: grid;
+  gap: 6px;
+}
+
+.progress__label { color: v.$muted; font-size: 13px; }
+.progress__bar { width: 100%; height: 14px; }
+
+.message {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid v.$border;
+}
+
+.message--success {
+  border-color: rgba(78, 205, 196, 0.8);
+  background: rgba(78, 205, 196, 0.12);
+}
+
+.message--error {
+  border-color: rgba(239, 68, 68, 0.8);
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.message--info {
+  border-color: rgba(161, 161, 170, 0.8);
+  background: rgba(161, 161, 170, 0.08);
+}
+
+.audio { width: 100%; margin-top: 10px; }
+
+.link { color: v.$accent-2; text-decoration: none; font-weight: 700; }
+.link:hover { text-decoration: underline; }
+
+.hint { color: v.$muted; font-size: 13px; margin-top: 8px; }

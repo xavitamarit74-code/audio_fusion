@@ -1,0 +1,32 @@
+@use '../base/variables' as v;
+
+.app {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.app__header {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.app__header-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.app__brand {
+  flex: 0 0 auto;
+  width: clamp(44px, 8vw, 64px);
+}
+
+.app__logo {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.app__title { margin: 0; font-size: 36px; }
+.app__subtitle { margin: 0; color: v.$muted; }

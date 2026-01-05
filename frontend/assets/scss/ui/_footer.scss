@@ -1,0 +1,15 @@
+@use '../base/variables' as v;
+
+.app__footer {
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid v.$border;
+  text-align: center;
+}
+
+.app__copyright {
+  display: inline-block;
+  color: v.$muted;
+  font-size: 12px;
+  line-height: 1.4;
+}
