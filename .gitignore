@@ -4,4 +4,18 @@ __pycache__/
 .web
 .states
 
+.DS_Store
+.pytest_cache/
+.coverage
+htmlcov/
+
+.venv/
+venv/
+
 node_modules/
+
+# Runtime / generated artifacts
+backend/storage/
+
+# Local media samples (keep repo light)
+pruebas/
