@@ -5,6 +5,8 @@ Tests para el módulo de procesamiento de audio.
 import pytest
 from pathlib import Path
 import sys
+import shutil
+import subprocess
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -18,6 +20,33 @@ from backend.audio_processor import (
     obtener_info_audio,
     FORMATOS_SOPORTADOS,
 )
+
+
+def _ffmpeg_available() -> bool:
+    """Devuelve True si hay un ffmpeg ejecutable disponible."""
+    try:
+        ffmpeg = shutil.which("ffmpeg")
+        if not ffmpeg:
+            try:
+                import imageio_ffmpeg
+
+                ffmpeg = imageio_ffmpeg.get_ffmpeg_exe()
+            except Exception:
+                ffmpeg = None
+
+        if not ffmpeg:
+            return False
+
+        proc = subprocess.run(
+            [ffmpeg, "-version"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+            text=True,
+        )
+        return proc.returncode == 0
+    except Exception:
+        return False
 
 
 class TestDetectarFormato:
@@ -327,6 +356,104 @@ class TestFusionarAudiosFormatos:
         
         assert resultado["exito"] is True
         assert Path(output).exists()
+
+
+class TestExportFormatosMp4Family:
+    """Tests para exportar formatos que antes fallaban (m4a/m4r/mp4)."""
+
+    @pytest.mark.parametrize("ext", ["m4a", "m4r", "mp4"])
+    def test_export_y_recarga(self, sample_audio_files, temp_dir, ext):
+        if not _ffmpeg_available():
+            pytest.skip("ffmpeg no disponible; export m4a/m4r/mp4 se omite")
+
+        output = str(temp_dir / f"output.{ext}")
+        resultado = fusionar_audios(
+            ruta_audio1=sample_audio_files["audio1"],
+            ruta_audio2=sample_audio_files["audio2"],
+            ruta_salida=output,
+            crossfade_ms=500,
+        )
+
+        assert resultado["exito"] is True
+        assert Path(output).exists()
+        assert Path(output).stat().st_size > 0
+
+        recargado = cargar_audio(output)
+        assert recargado is not None
+        assert len(recargado) > 0
+
+
+class TestExportMuxerMap:
+    """Tests unitarios del mapeo extensión->muxer sin invocar ffmpeg."""
+
+    @pytest.mark.parametrize(
+        "ruta_salida,expected_format",
+        [
+            ("/tmp/out.m4a", "ipod"),
+            ("/tmp/out.m4r", "ipod"),
+            ("/tmp/out.mp4", "mp4"),
+        ],
+    )
+    def test__export_audio_no_usa_m4a_como_muxer(self, monkeypatch, temp_dir, ruta_salida, expected_format):
+        from pydub import AudioSegment
+        from backend import audio_processor
+
+        called = {"format": None, "kwargs": None, "out": None}
+
+        def fake_export(self, out_f, format=None, **kwargs):
+            called["format"] = format
+            called["kwargs"] = kwargs
+            called["out"] = out_f
+            # Crear un archivo dummy para no depender de ffmpeg
+            out_path = Path(out_f)
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            out_path.write_bytes(b"dummy")
+            return None
+
+        monkeypatch.setattr(AudioSegment, "export", fake_export, raising=True)
+
+        salida_real = str(temp_dir / Path(ruta_salida).name)
+        audio_processor._export_audio(AudioSegment.silent(duration=500), salida_real)
+
+        assert called["format"] == expected_format
+        assert called["format"] != "m4a"
+
+
+class TestCargarMediosRealesOpcional:
+    """Tests opcionales: usan archivos en pruebas/ si existen (repo ligero)."""
+
+    def test_cargar_m4a_real_si_existe(self, project_root):
+        ruta = project_root / "pruebas" / "mis-gaviotas_Episodio_01.m4a"
+        if not ruta.exists():
+            pytest.skip("No existe pruebas/mis-gaviotas_Episodio_01.m4a")
+        if not _ffmpeg_available():
+            pytest.skip("ffmpeg no disponible")
+
+        audio = cargar_audio(str(ruta))
+        assert audio is not None
+        assert len(audio) > 0
+
+    def test_cargar_mp4_real_si_existe(self, project_root):
+        ruta = project_root / "pruebas" / "VIDEO-2026-01-03-17-36-54.mp4"
+        if not ruta.exists():
+            pytest.skip("No existe pruebas/VIDEO-2026-01-03-17-36-54.mp4")
+        if not _ffmpeg_available():
+            pytest.skip("ffmpeg no disponible")
+
+        audio = cargar_audio(str(ruta))
+        assert audio is not None
+        assert len(audio) > 0
+
+    def test_cargar_mov_real_si_existe(self, project_root):
+        ruta = project_root / "pruebas" / "copy_B7D6413A-3E0C-40EA-A165-75736A6B9AE9.mov"
+        if not ruta.exists():
+            pytest.skip("No existe pruebas/copy_....mov")
+        if not _ffmpeg_available():
+            pytest.skip("ffmpeg no disponible")
+
+        audio = cargar_audio(str(ruta))
+        assert audio is not None
+        assert len(audio) > 0
 
 
 class TestFusionarAudiosEdgeCases:

@@ -23,9 +23,10 @@ def _configure_ffmpeg() -> None:
     ffmpeg = shutil.which("ffmpeg")
     ffprobe = shutil.which("ffprobe")
 
-    if ffmpeg and ffprobe:
+    if ffmpeg:
         AudioSegment.converter = ffmpeg
-        AudioSegment.ffprobe = ffprobe
+        if ffprobe:
+            AudioSegment.ffprobe = ffprobe
         return
 
     try:
@@ -34,7 +35,6 @@ def _configure_ffmpeg() -> None:
         exe = imageio_ffmpeg.get_ffmpeg_exe()
         if exe:
             AudioSegment.converter = exe
-            AudioSegment.ffprobe = exe
     except Exception:
         # Si no hay ffmpeg (ni sistema ni fallback), pydub fallará al exportar/importar.
         # Preferimos no romper el import; el error será más claro cuando se use.
@@ -65,8 +65,19 @@ def detectar_formato(filepath: str) -> str:
 
 def cargar_audio(filepath: str) -> AudioSegment:
     """Carga un archivo de audio (o contenedor de vídeo con pista de audio)."""
+    extension = Path(filepath).suffix.lower()
+
+    # En contenedores (MOV/MP4/M4A/M4R) es más robusto dejar que ffmpeg autodetecte.
+    if extension in {".mov", ".mp4", ".m4a", ".m4r"}:
+        return AudioSegment.from_file(filepath)
+
+    # Para el resto, mantenemos el mapeo por extensión por compatibilidad.
     formato = detectar_formato(filepath)
-    return AudioSegment.from_file(filepath, format=formato)
+    try:
+        return AudioSegment.from_file(filepath, format=formato)
+    except Exception:
+        # Fallback: intentar autodetección si el formato forzado no funciona.
+        return AudioSegment.from_file(filepath)
 
 
 def normalizar_audio(audio: AudioSegment, target_dbfs: float = -14.0) -> AudioSegment:
@@ -88,17 +99,39 @@ def fusionar_dos_audios(
 
 def _export_audio(resultado: AudioSegment, ruta_salida: str) -> None:
     """Exporta con parámetros razonables según formato."""
+    extension = Path(ruta_salida).suffix.lower()
     formato_salida = detectar_formato(ruta_salida)
     export_params: dict = {}
 
-    if formato_salida == "mp3":
-        export_params = {"bitrate": "320k"}
-    elif formato_salida in ["m4a", "m4r", "mp4", "aac"]:
-        # En contenedores MP4/M4A, AAC es lo más compatible (iOS/Safari).
+    # Mapeo de extensión -> muxer/format de ffmpeg (pydub usa -f <format>).
+    # Importante: "m4a" no suele ser un muxer válido; usar "ipod" o "mp4".
+    if extension in {".m4a", ".m4r"}:
+        export_format_candidates = ["ipod", "mp4"]
         export_params = {"codec": "aac", "bitrate": "256k"}
+    elif extension == ".mp4":
+        export_format_candidates = ["mp4"]
+        export_params = {"codec": "aac", "bitrate": "256k"}
+    elif extension == ".aac":
+        export_format_candidates = ["adts"]
+        export_params = {"codec": "aac", "bitrate": "256k"}
+    elif formato_salida == "mp3":
+        export_format_candidates = ["mp3"]
+        export_params = {"bitrate": "320k"}
+    else:
+        export_format_candidates = [formato_salida]
 
     Path(ruta_salida).parent.mkdir(parents=True, exist_ok=True)
-    resultado.export(ruta_salida, format=formato_salida, **export_params)
+
+    last_error: Optional[Exception] = None
+    for export_format in export_format_candidates:
+        try:
+            resultado.export(ruta_salida, format=export_format, **export_params)
+            return
+        except Exception as e:
+            last_error = e
+
+    if last_error:
+        raise last_error
 
 
 def fusionar_multiples_audios(

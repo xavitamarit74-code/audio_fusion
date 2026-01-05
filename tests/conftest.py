@@ -8,9 +8,37 @@ import shutil
 from pathlib import Path
 import sys
 import os
+import subprocess
 
 # Añadir el directorio padre al path para importar módulos
 sys.path.insert(0, str(Path(__file__).parent.parent))
+
+
+def _ffmpeg_available() -> bool:
+    """Devuelve True si hay un ffmpeg ejecutable disponible para pydub."""
+    try:
+        ffmpeg = shutil.which("ffmpeg")
+        if not ffmpeg:
+            try:
+                import imageio_ffmpeg
+
+                ffmpeg = imageio_ffmpeg.get_ffmpeg_exe()
+            except Exception:
+                ffmpeg = None
+
+        if not ffmpeg:
+            return False
+
+        proc = subprocess.run(
+            [ffmpeg, "-version"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+            text=True,
+        )
+        return proc.returncode == 0
+    except Exception:
+        return False
 
 
 @pytest.fixture(scope="session")
@@ -28,6 +56,9 @@ def sample_audio_files(temp_dir):
     Genera archivos de audio de prueba usando pydub.
     Crea dos tonos simples de 3 segundos cada uno.
     """
+    if not _ffmpeg_available():
+        pytest.skip("ffmpeg no disponible; tests de audio comprimido se omiten")
+
     from pydub import AudioSegment
     from pydub.generators import Sine
     
@@ -55,6 +86,9 @@ def short_audio_files(temp_dir):
     """
     Genera archivos de audio muy cortos para probar edge cases.
     """
+    if not _ffmpeg_available():
+        pytest.skip("ffmpeg no disponible; tests de audio comprimido se omiten")
+
     from pydub import AudioSegment
     from pydub.generators import Sine
     

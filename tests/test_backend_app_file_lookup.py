@@ -49,3 +49,30 @@ def test_file_path_raises_when_missing(tmp_path, monkeypatch):
         app._file_path("does_not_exist")
 
     assert exc.value.status_code == 404
+
+
+@pytest.mark.parametrize(
+    "raw,expected",
+    [
+        (None, "mp3"),
+        ("mp3", "mp3"),
+        (".mp3", "mp3"),
+        (" audio_fusion.mp3 ", "mp3"),
+        ("M4A", "m4a"),
+        (".m4r", "m4r"),
+        ("audio_fusion.m4r", "m4r"),
+        ("mp4", "mp4"),
+        ("aac", "aac"),
+    ],
+)
+def test_normalize_output_format(raw, expected):
+    import backend.app as app
+
+    assert app._normalize_output_format(raw) == expected
+
+
+def test_allowed_output_formats_include_aac_family():
+    import backend.app as app
+
+    for ext in {"m4a", "m4r", "mp4", "aac"}:
+        assert ext in app._ALLOWED_OUTPUT_FORMATS
